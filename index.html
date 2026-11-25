@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function(){
+  try{
+    var stored = localStorage.getItem('impulseia-theme');
+    var theme = (stored === 'dark') ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+})();
+</script>
+<title>ImpulseIA — Soluciones con IA para pymes</title>
+<meta name="description" content="Empleados digitales, chatbots, gestor de turnos, páginas web, control de stock y contaduría automatizada para pymes. Invierte una vez y reduce tus costos fijos. / AI solutions for small and mid-sized businesses.">
+<style>
+/* THESIS: el sitio es la demo. Una consultora de IA no puede vender con una página
+   estática: el movimiento, la reactividad y el detalle SON el argumento de venta.
+   OWN-WORLD: lienzo oscuro por defecto, un solo acento (ember, terracota energizada), tipografía
+   Bricolage Grotesque de carácter fuerte para el display y Instrument Sans para el cuerpo.
+   METÁFORA: un campo de partículas caótico que se ordena en grilla al hacer scroll — el caos
+   administrativo, ordenado por sistemas. Ninguna foto ajena: todo lo visual es generativo o construido.
+   FIRST VIEWPORT: canvas generativo de fondo + titular cinético con stagger + cursor propio.
+   FORM: página de una sola columna, familias de sección distintas (canvas hero, marquee, editorial con
+   scroll-scrub, demo de chat interactivo, lista agrupada, banda de acento con mockup animado, acordeón).
+   FINISH: motion con propósito nombrado en cada caso, reduced-motion respetado, ambos temas resueltos. */
+
+:root{
+  /* light, default world: white / black / one loud orange */
+  --bg:#EFE3DA;
+  --bg-dim:#DEC7B4;
+  --text:#5A3B24;
+  --text-soft:#7C5A3C;
+  --accent:#7C5A3C;
+  --accent-deep:#5A3B24;
+  --on-accent:#EFE3DA;
+  --line:#DEC7B4;
+  --line-strong:#C29F7C;
+  --radius:3px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --ease-in-out:cubic-bezier(0.77,0,0.175,1);
+  --max:1180px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#241B10;
+    --bg-dim:#2E2316;
+    --text:#F1E6D6;
+    --text-soft:#C2AE8C;
+    --accent:#C29F7C;
+    --accent-deep:#A97B54;
+    --on-accent:#241B10;
+    --line:rgba(241,230,214,0.14);
+    --line-strong:rgba(241,230,214,0.24);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#241B10;
+  --bg-dim:#2E2316;
+  --text:#F1E6D6;
+  --text-soft:#C2AE8C;
+  --accent:#C29F7C;
+  --accent-deep:#A97B54;
+  --on-accent:#241B10;
+  --line:rgba(241,230,214,0.14);
+  --line-strong:rgba(241,230,214,0.24);
+}
+:root[data-theme="light"]{
+  --bg:#EFE3DA;
+  --bg-dim:#DEC7B4;
+  --text:#5A3B24;
+  --text-soft:#7C5A3C;
+  --accent:#7C5A3C;
+  --accent-deep:#5A3B24;
+  --on-accent:#EFE3DA;
+  --line:#DEC7B4;
+  --line-strong:#C29F7C;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; overflow-anchor:none;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  overflow-anchor:none;
+}
+
+::selection{ background:var(--accent); color:var(--on-accent); }
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-track{ background:var(--bg-dim); }
+::-webkit-scrollbar-thumb{ background:var(--accent); border-radius:8px; border:2px solid var(--bg-dim); }
+
+a{ color:inherit; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:1px; }
+img{ display:block; max-width:100%; }
+h1,h2,h3{ margin:0; font-weight:600; letter-spacing:-0.02em; text-wrap:balance; }
+p{ margin:0; }
+
+/* ---------- grain texture (subtle, sober elegance) ---------- */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:500;
+  opacity:0.035; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) body::before{ opacity:0.05; mix-blend-mode:overlay; } }
+:root[data-theme="dark"] body::before{ opacity:0.05; mix-blend-mode:overlay; }
+
+/* ---------- BRAND STATEMENT (protagonist wordmark) ---------- */
+.brand-statement{ padding:64px 0 96px; overflow:hidden; }
+.brand-huge{
+  display:flex; align-items:baseline; justify-content:center; flex-wrap:wrap;
+  gap:0.02em; font-family:"Bricolage Grotesque",sans-serif; font-weight:700;
+  font-size:clamp(3.4rem, 13vw, 10.5rem); line-height:0.9; letter-spacing:-0.04em;
+  text-align:center; margin:0;
+}
+.brand-huge .bh1{ color:var(--text); will-change:transform; }
+.brand-huge .bh2{ color:var(--accent); will-change:transform; }
+@media (max-width:640px){ .brand-statement{ padding:44px 0 64px; } }
+
+/* ---------- theme toggle ---------- */
+.theme-toggle{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--line-strong);
+  background:transparent; color:var(--text); cursor:pointer; flex:none;
+  transition:border-color 160ms var(--ease-out), transform 160ms var(--ease-out), background 160ms var(--ease-out);
+}
+.theme-toggle:hover{ border-color:var(--accent); color:var(--accent); }
+.theme-toggle:active{ transform:scale(0.9); }
+.theme-toggle svg{ width:18px; height:18px; }
+.theme-toggle .icon-moon{ display:none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun{ display:none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon{ display:block; }
+
+/* ---------- language switch ---------- */
+.lang-switch{ display:flex; align-items:center; border:1px solid var(--line-strong); border-radius:var(--radius); overflow:hidden; flex:none; }
+.lang-switch button{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:0.06em; font-weight:500;
+  padding:7px 10px; background:transparent; color:var(--text-soft); border:none; cursor:pointer;
+  transition:background 160ms var(--ease-out), color 160ms var(--ease-out);
+}
+.lang-switch button+button{ border-left:1px solid var(--line-strong); }
+.lang-switch button:hover{ color:var(--text); }
+.lang-switch button.active{ background:var(--accent); color:var(--on-accent); }
+@media (max-width:640px){ .lang-switch button{ padding:5px 6px; font-size:9.5px; } }
+
+/* ---------- offer icons (line-icon set) ---------- */
+.offer-icon{
+  flex:none; width:38px; height:38px; border-radius:50%; border:1px solid var(--line-strong);
+  display:flex; align-items:center; justify-content:center; color:var(--accent);
+  transition:transform 320ms cubic-bezier(0.34,1.56,0.64,1), border-color 220ms var(--ease-out), background 220ms var(--ease-out);
+}
+.offer-icon svg{ width:19px; height:19px; }
+.offer-row:hover .offer-icon{ transform:scale(1.12) rotate(-4deg); border-color:var(--accent); background:var(--bg-dim); }
+.offer-text{ display:flex; flex-direction:column; gap:6px; }
+
+/* ---------- hero bell ---------- */
+.hero-eyebrow svg{ width:15px; height:15px; color:var(--accent); animation:bellring 3.4s ease-in-out 1; transform-origin:50% 10%; }
+@keyframes bellring{
+  0%,55%,100%{ transform:rotate(0); }
+  58%{ transform:rotate(-14deg); } 61%{ transform:rotate(11deg); } 64%{ transform:rotate(-8deg); }
+  67%{ transform:rotate(5deg); } 70%{ transform:rotate(-2deg); } 73%{ transform:rotate(0); }
+}
+@media (prefers-reduced-motion: reduce){ .hero-eyebrow svg{ animation:none; } }
+
+/* ---------- brand bell mark (hospitality anchor) ---------- */
+.word{ display:inline-flex; align-items:center; gap:8px; text-decoration:none; }
+.bell-mark{ width:19px; height:19px; color:var(--accent); flex:none; transform-origin:50% 100%; animation:bellidle 5.5s ease-in-out infinite; }
+@keyframes bellidle{
+  0%,84%,100%{ transform:translateY(0) scaleY(1); }
+  87%{ transform:translateY(1.4px) scaleY(0.9); }
+  90%{ transform:translateY(-1.2px) scaleY(1.06); }
+  93%{ transform:translateY(0.3px) scaleY(0.98); }
+  96%{ transform:translateY(0) scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce){ .bell-mark{ animation:none; } }
+
+.bell-mark-big{
+  width:clamp(34px,5vw,52px); height:clamp(34px,5vw,52px);
+  color:var(--accent); display:block; margin:0 auto 18px;
+}
+.brand-statement{ text-align:center; }
+
+/* ---------- PROJECTS CAROUSEL ---------- */
+#proyectos .wrap{ margin-bottom:8px; }
+.carousel-wrap{ position:relative; }
+.carousel-track{
+  display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory;
+  padding:8px 32px 30px; cursor:grab; scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  user-select:none;
+}
+.carousel-track::-webkit-scrollbar{ display:none; }
+.carousel-track.dragging{ cursor:grabbing; scroll-snap-type:none; }
+.project-card{
+  flex:0 0 auto; width:min(80vw,336px); scroll-snap-align:start;
+  background:var(--bg-dim); border:1px solid var(--line-strong); border-radius:16px;
+  padding:28px; display:flex; flex-direction:column; gap:16px;
+  transition:transform 300ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 300ms var(--ease-out);
+}
+.project-card:hover{ transform:translateY(-6px); border-color:var(--accent); box-shadow:0 22px 40px -26px rgba(0,0,0,0.35); }
+.project-icon{
+  width:46px; height:46px; border-radius:50%; border:1px solid var(--line-strong);
+  display:flex; align-items:center; justify-content:center; color:var(--accent); flex:none;
+  transition:transform 320ms cubic-bezier(0.34,1.56,0.64,1), border-color 220ms var(--ease-out);
+}
+.project-icon svg{ width:22px; height:22px; }
+.project-card:hover .project-icon{ transform:scale(1.1) rotate(-4deg); border-color:var(--accent); }
+.project-tag{ font-family:"IBM Plex Mono",monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-soft); }
+.project-card h3{ font-family:"Bricolage Grotesque",sans-serif; font-size:20px; font-weight:600; letter-spacing:-0.01em; }
+.project-card p{ font-size:14.5px; color:var(--text-soft); line-height:1.55; }
+
+.carousel-controls{ display:flex; align-items:center; justify-content:center; gap:18px; margin-top:4px; }
+.carousel-btn{
+  width:42px; height:42px; border-radius:50%; border:1px solid var(--line-strong); background:transparent;
+  color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none;
+  transition:border-color 200ms var(--ease-out), color 200ms var(--ease-out), transform 160ms var(--ease-out);
+}
+.carousel-btn:hover{ border-color:var(--accent); color:var(--accent); }
+.carousel-btn:active{ transform:scale(0.92); }
+.carousel-btn svg{ width:18px; height:18px; }
+.carousel-dots{ display:flex; align-items:center; gap:8px; }
+.carousel-dot{ width:7px; height:7px; border-radius:50%; background:var(--line-strong); transition:background 240ms var(--ease-out), transform 240ms var(--ease-out); }
+.carousel-dot.active{ background:var(--accent); transform:scale(1.35); }
+
+.font-display{ font-family:"Bricolage Grotesque","Instrument Sans",sans-serif; }
+.font-mono{ font-family:"IBM Plex Mono",ui-monospace,monospace; }
+
+.wrap{ max-width:var(--max); margin:0 auto; padding:0 32px; position:relative; }
+@media (max-width:640px){ .wrap{ padding:0 20px; } }
+
+/* ---------- custom cursor ---------- */
+.cursor-dot, .cursor-ring{
+  position:fixed; top:0; left:0; pointer-events:none; z-index:999;
+  border-radius:50%; transform:translate(-50%,-50%);
+  will-change:transform;
+}
+.cursor-dot{ width:6px; height:6px; background:var(--accent); }
+.cursor-ring{
+  width:34px; height:34px; border:1px solid var(--line-strong);
+  transition:width 220ms var(--ease-out), height 220ms var(--ease-out), border-color 220ms var(--ease-out), background 220ms var(--ease-out);
+}
+.cursor-ring.hover{ width:56px; height:56px; border-color:var(--accent); background:rgba(232,116,76,0.08); }
+@media (hover:none), (pointer:coarse){ .cursor-dot,.cursor-ring{ display:none; } }
+html.no-hover .cursor-dot, html.no-hover .cursor-ring{ display:none; }
+
+/* ---------- NAV ---------- */
+header.site{
+  position:sticky; top:0; z-index:40;
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter:blur(12px) saturate(150%);
+  -webkit-backdrop-filter:blur(12px) saturate(150%);
+  border-bottom:1px solid var(--line);
+}
+nav.site{
+  max-width:var(--max); margin:0 auto; padding:0 32px;
+  height:68px; display:flex; align-items:center; justify-content:space-between; gap:24px;
+}
+@media (max-width:640px){ nav.site{ padding:0 20px; height:58px; } }
+
+.word{ font-family:"Bricolage Grotesque",sans-serif; font-size:25px; font-weight:700; letter-spacing:-0.02em; white-space:nowrap; }
+.word em{ font-style:normal; color:var(--accent); }
+
+.nav-links{ display:flex; align-items:center; gap:30px; font-size:15px; color:var(--text-soft); }
+.nav-links a:not(.btn){ text-decoration:none; transition:color 160ms var(--ease-out); position:relative; }
+.nav-links a:not(.btn)::after{
+  content:""; position:absolute; left:0; right:100%; bottom:-4px; height:1px; background:var(--accent);
+  transition:right 220ms var(--ease-out);
+}
+.nav-links a:not(.btn):hover{ color:var(--text); }
+.nav-links a:not(.btn):hover::after{ right:0; }
+@media (max-width:860px){ .nav-links .hide-narrow{ display:none; } }
+/* Narrow screens only show the logo, language switch, theme toggle and CTA —
+   tighten spacing so that row still fits without wrapping or overflowing. */
+@media (max-width:480px){
+  nav.site{ gap:8px; }
+  .nav-links{ gap:6px; }
+  .nav-links > .btn{ padding:8px 11px; font-size:12.5px; }
+  .word{ font-size:19px; gap:6px; }
+}
+@media (max-width:360px){
+  nav.site{ padding:0 14px; gap:6px; }
+  .word{ font-size:16px; }
+  .theme-toggle{ width:30px; height:30px; }
+  .theme-toggle svg{ width:14px; height:14px; }
+  .lang-switch button{ padding:4px 5px; font-size:9px; }
+  .nav-links > .btn{ padding:7px 9px; font-size:11.5px; }
+}
+@media (max-width:330px){
+  /* Safety net for very narrow phones: rather than shrink touch targets
+     further, let the nav controls scroll horizontally so nothing clips or
+     overlaps. */
+  .nav-links{ overflow-x:auto; scrollbar-width:none; }
+  .nav-links::-webkit-scrollbar{ display:none; }
+}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 22px; border-radius:999px; font-size:15px; font-weight:600;
+  text-decoration:none; white-space:nowrap; border:1px solid transparent;
+  transition:transform 160ms var(--ease-out), background 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out);
+  cursor:pointer; position:relative;
+}
+.btn:active{ transform:scale(0.96); }
+.btn-primary{ background:var(--accent); color:var(--on-accent); }
+.btn-primary:hover{ background:var(--accent-deep); }
+.btn-ghost{ background:transparent; color:var(--text); border-color:var(--line-strong); }
+.btn-ghost:hover{ border-color:var(--accent); color:var(--accent); }
+.magnetic{ display:inline-block; }
+
+/* ---------- HERO ---------- */
+.hero{ position:relative; min-height:min(92vh,820px); display:flex; align-items:center; overflow:hidden; }
+/* Safari (esp. mobile) recalculates `vh` live as its address bar shows/hides
+   while scrolling, so the hero — and the whole page — grows/shrinks mid-scroll,
+   producing a jerky up/down jump. `svh` locks to the smallest possible viewport
+   (bar always shown) so the hero's height stays fixed no matter what the bar
+   does. Browsers without svh support simply ignore this line and keep the
+   rule above. */
+.hero{ min-height:min(92svh,820px); }
+#hero-canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+.hero .wrap{ z-index:2; padding-top:40px; padding-bottom:64px; }
+.hero-eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:13px; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:26px;
+}
+.hero-eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1.8s var(--ease-in-out) infinite; }
+@keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:0.4; transform:scale(1.5);} }
+@media (prefers-reduced-motion: reduce){ .hero-eyebrow .dot{ animation:none; } }
+
+.hero h1{
+  font-family:"Bricolage Grotesque",sans-serif; font-weight:600;
+  font-size:clamp(2.6rem, 6.4vw, 5.6rem); line-height:0.98; letter-spacing:-0.03em;
+  max-width:15ch; margin-bottom:30px;
+}
+.hero h1 .word-wrap{ display:inline-block; overflow:hidden; padding-bottom:0.08em; margin-bottom:-0.08em; }
+.hero h1 .word-inner{ display:inline-block; transform:translateY(110%); }
+.hero h1 em{ font-style:normal; color:var(--accent); }
+
+.hero p.lede{ font-size:19px; color:var(--text-soft); max-width:46ch; margin-bottom:38px; }
+.hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+
+.scroll-cue{
+  position:absolute; left:32px; bottom:28px; z-index:2; display:flex; align-items:center; gap:10px;
+  font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--text-soft);
+}
+.scroll-cue .line{ width:1px; height:34px; background:linear-gradient(var(--accent), transparent); animation:scrollcue 1.8s var(--ease-in-out) infinite; }
+@keyframes scrollcue{ 0%{ transform:scaleY(0); transform-origin:top;} 50%{ transform:scaleY(1); transform-origin:top;} 51%{ transform-origin:bottom;} 100%{ transform:scaleY(0); transform-origin:bottom;} }
+@media (max-width:640px){ .scroll-cue{ display:none; } }
+@media (prefers-reduced-motion: reduce){ .scroll-cue .line{ animation:none; } }
+
+/* ---------- MARQUEE ---------- */
+.marquee-band{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); overflow:hidden; padding:22px 0; }
+.marquee-track{ display:flex; width:max-content; animation:marquee 32s linear infinite; }
+.marquee-band:hover .marquee-track{ animation-play-state:paused; }
+.marquee-track span{
+  font-family:"Bricolage Grotesque",sans-serif; font-size:clamp(1.1rem,2.4vw,1.6rem);
+  padding:0 28px; white-space:nowrap; color:var(--text-soft); display:flex; align-items:center; gap:28px;
+}
+.marquee-track span::after{ content:"—"; color:var(--accent); }
+@keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+@media (prefers-reduced-motion: reduce){ .marquee-track{ animation:none; } }
+
+/* ---------- SCAFFOLD ---------- */
+section{ padding:110px 0; position:relative; }
+@media (max-width:640px){ section{ padding:72px 0; } }
+.section-head{ max-width:60ch; margin-bottom:52px; }
+.section-tag{
+  font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--accent); margin-bottom:14px; display:block;
+}
+.section-head h2{ font-family:"Bricolage Grotesque",sans-serif; font-size:clamp(1.8rem,3.4vw,2.6rem); }
+.section-head p{ color:var(--text-soft); font-size:17px; margin-top:16px; }
+
+/* ---------- QUIEN SOY (kinetic reveal) ---------- */
+.kinetic-block{ background:var(--bg-dim); }
+.kinetic-block .wrap{ max-width:920px; }
+.kinetic-text{ font-family:"Bricolage Grotesque",sans-serif; font-size:clamp(1.5rem,3.2vw,2.5rem); line-height:1.35; letter-spacing:-0.01em; }
+.kinetic-text .kw{ opacity:0.18; transition:opacity 60ms linear; }
+.kinetic-text .kw.lit{ opacity:1; }
+/* "ImpulseIA" gets the same treatment as the logo (accent color + bold),
+   kept at the paragraph's own font-size rather than the logo's larger scale. */
+.kinetic-text .kw.accent{ color:var(--accent); font-weight:700; }
+.kinetic-block .signoff{ margin-top:40px; font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--accent); letter-spacing:0.04em; }
+
+/* ---------- CHAT DEMO ---------- */
+.demo-grid{ display:grid; grid-template-columns:0.95fr 1.05fr; gap:64px; align-items:center; }
+@media (max-width:900px){ .demo-grid{ grid-template-columns:1fr; gap:36px; } }
+.demo-copy p.lede{ color:var(--text-soft); font-size:18px; max-width:46ch; margin-top:16px; }
+.demo-list{ margin-top:28px; display:flex; flex-direction:column; gap:14px; }
+.demo-list .item{ display:flex; gap:12px; font-size:15px; color:var(--text-soft); align-items:baseline; }
+.demo-list .item b{ color:var(--text); font-weight:600; }
+.demo-list .item::before{ content:"→"; color:var(--accent); font-family:"IBM Plex Mono",monospace; }
+
+.phone{
+  background:var(--bg); border:1px solid var(--line-strong); border-radius:22px;
+  padding:20px; max-width:380px; margin:0 auto; box-shadow:0 40px 80px -30px rgba(0,0,0,0.5);
+}
+.phone-head{ display:flex; align-items:center; gap:10px; padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:16px; }
+.phone-head .avatar{ width:34px; height:34px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-family:"Bricolage Grotesque",sans-serif; font-weight:600; color:var(--on-accent); font-size:14px; }
+.phone-head .who{ display:flex; flex-direction:column; }
+.phone-head .who .name{ font-weight:600; font-size:15px; }
+.phone-head .who .status{ font-size:12px; color:var(--accent); font-family:"IBM Plex Mono",monospace; display:flex; align-items:center; gap:6px; }
+.phone-head .who .status .d{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+/* Fixed height + overflow:hidden (was min-height, unbounded): the chat demo
+   below adds/removes message bubbles in an endless loop, and without a fixed
+   height that constant growing/shrinking pushed every section below it up
+   and down for as long as the demo kept animating. With a fixed height, old
+   bubbles scroll out of view like a real chat window instead of resizing
+   the page. */
+.phone-body{ height:280px; overflow:hidden; display:flex; flex-direction:column; gap:10px; justify-content:flex-end; }
+.bubble{
+  max-width:82%; padding:10px 14px; border-radius:14px; font-size:14.5px; line-height:1.4;
+  opacity:0; transform:translateY(8px) scale(0.98); transition:opacity 320ms var(--ease-out), transform 320ms var(--ease-out);
+}
+.bubble.in{ opacity:1; transform:translateY(0) scale(1); }
+.bubble.guest{ align-self:flex-end; background:var(--accent); color:var(--on-accent); border-bottom-right-radius:4px; }
+.bubble.bot{ align-self:flex-start; background:var(--bg-dim); border:1px solid var(--line); border-bottom-left-radius:4px; }
+.typing{ align-self:flex-start; display:flex; gap:4px; padding:12px 14px; background:var(--bg-dim); border:1px solid var(--line); border-radius:14px; border-bottom-left-radius:4px; opacity:0; transition:opacity 200ms var(--ease-out); }
+.typing.in{ opacity:1; }
+.typing span{ width:6px; height:6px; border-radius:50%; background:var(--text-soft); animation:bounce 1.1s infinite ease-in-out; }
+.typing span:nth-child(2){ animation-delay:0.15s; } .typing span:nth-child(3){ animation-delay:0.3s; }
+@keyframes bounce{ 0%,60%,100%{ transform:translateY(0); opacity:0.5; } 30%{ transform:translateY(-4px); opacity:1; } }
+.phone-foot{ margin-top:16px; padding-top:14px; border-top:1px solid var(--line); font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--text-soft); text-align:center; letter-spacing:0.04em; }
+
+/* ---------- QUE HAGO ---------- */
+.offers-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0 56px; }
+@media (max-width:760px){ .offers-grid{ grid-template-columns:1fr; gap:8px; } }
+.offer-cluster h3{ font-family:"IBM Plex Mono",monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.14em; color:var(--accent); font-weight:500; margin-bottom:4px; }
+.offer-row{
+  padding:22px 4px; border-top:1px solid var(--line); display:flex; flex-direction:row; align-items:flex-start; gap:16px;
+  transition:padding-left 260ms var(--ease-out), background 260ms var(--ease-out); border-radius:var(--radius);
+}
+.offer-row:hover{ padding-left:16px; background:var(--bg-dim); }
+.offer-cluster{ margin-bottom:8px; }
+.offer-row .name{ font-family:"Bricolage Grotesque",sans-serif; font-size:19px; font-weight:600; letter-spacing:-0.01em; }
+.offer-row .desc{ font-size:15px; color:var(--text-soft); max-width:46ch; }
+
+/* ---------- CRM FEATURE BAND ---------- */
+.feature-band{ background:var(--accent); color:var(--on-accent); overflow:hidden; }
+.feature-grid{ display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+@media (max-width:900px){ .feature-grid{ grid-template-columns:1fr; gap:36px; } }
+.feature-band .section-tag{ color:var(--on-accent); opacity:0.7; }
+.feature-band h2{ font-family:"Bricolage Grotesque",sans-serif; font-size:clamp(1.9rem,3.6vw,2.7rem); color:var(--on-accent); }
+.feature-band p.lede{ font-size:18px; color:var(--on-accent); opacity:0.85; margin-top:18px; max-width:44ch; }
+.feature-band .hero-ctas{ margin-top:32px; }
+.feature-band .btn-ghost{ border-color:color-mix(in srgb, var(--on-accent) 45%, transparent); color:var(--on-accent); }
+.feature-band .btn-ghost:hover{ border-color:var(--on-accent); background:color-mix(in srgb, var(--on-accent) 12%, transparent); color:var(--on-accent); }
+
+.mock-panel{ background:color-mix(in srgb, var(--on-accent) 8%, transparent); border:1px solid color-mix(in srgb, var(--on-accent) 22%, transparent); border-radius:14px; padding:22px; }
+.mock-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid color-mix(in srgb, var(--on-accent) 14%, transparent); font-family:"IBM Plex Mono",monospace; font-size:13px; }
+.mock-row:last-child{ border-bottom:none; }
+.mock-label{ opacity:0.75; }
+.mock-bar-track{ flex:1; height:6px; margin:0 14px; background:color-mix(in srgb, var(--on-accent) 16%, transparent); border-radius:4px; overflow:hidden; }
+.mock-bar-fill{ height:100%; background:var(--on-accent); width:0%; border-radius:4px; transition:width 1.1s var(--ease-out); }
+.mock-val{ opacity:0.9; min-width:34px; text-align:right; }
+.mock-badge-top{ display:inline-block; background:var(--on-accent); color:var(--accent); font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; padding:6px 10px; border-radius:999px; margin-bottom:22px; }
+.process-flow{ display:flex; align-items:flex-start; justify-content:space-between; gap:4px; margin-bottom:22px; }
+.process-step{ display:flex; flex-direction:column; align-items:center; gap:10px; flex:1; text-align:center; }
+.process-icon{ width:44px; height:44px; border-radius:50%; background:color-mix(in srgb, var(--on-accent) 14%, transparent); border:1px solid color-mix(in srgb, var(--on-accent) 22%, transparent); display:flex; align-items:center; justify-content:center; color:var(--on-accent); flex:none; }
+.process-icon svg{ width:18px; height:18px; }
+.process-label{ font-family:"IBM Plex Mono",monospace; font-size:11px; opacity:0.85; line-height:1.3; }
+.process-arrow{ opacity:0.35; font-size:14px; padding-top:12px; flex:none; }
+
+/* ---------- QUIET NOTE ---------- */
+.quiet-note{ border-left:2px solid var(--accent); padding-left:28px; max-width:760px; }
+.quiet-note p{ font-size:18px; color:var(--text-soft); }
+.quiet-note p + p{ margin-top:14px; }
+.quiet-note strong{ color:var(--text); }
+
+/* ---------- FAQ ---------- */
+.faq-list{ max-width:840px; }
+.faq-item{ border-top:1px solid var(--line); }
+.faq-item:last-child{ border-bottom:1px solid var(--line); }
+.faq-q{
+  width:100%; text-align:left; background:none; border:none; cursor:pointer;
+  padding:22px 0; display:flex; align-items:center; justify-content:space-between; gap:20px;
+  font-family:inherit; font-size:17px; font-weight:600; color:var(--text);
+}
+.faq-q .plus{ flex:none; width:22px; height:22px; position:relative; transition:transform 320ms var(--ease-in-out); }
+.faq-q .plus::before, .faq-q .plus::after{ content:""; position:absolute; background:var(--accent); top:50%; left:50%; transform:translate(-50%,-50%); }
+.faq-q .plus::before{ width:14px; height:2px; }
+.faq-q .plus::after{ width:2px; height:14px; transition:opacity 200ms var(--ease-out); }
+.faq-item[data-open="true"] .plus::after{ opacity:0; }
+.faq-a{ overflow:hidden; max-height:0; transition:max-height 360ms var(--ease-in-out); }
+.faq-a p{ padding:0 0 22px; color:var(--text-soft); font-size:16px; max-width:64ch; }
+
+/* ---------- CONTACT ---------- */
+.contact-band{ position:relative; text-align:center; overflow:hidden; }
+#contact-canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:0; opacity:0.6; }
+.contact-band .wrap{ z-index:1; }
+.contact-band h2{ font-family:"Bricolage Grotesque",sans-serif; color:var(--text); font-size:clamp(2.1rem,4.8vw,3.4rem); max-width:16ch; margin:0 auto 20px; line-height:1.05; }
+.contact-band h2 em{ font-style:normal; color:var(--accent); }
+.contact-band p.lede{ color:var(--text-soft); font-size:18px; max-width:48ch; margin:0 auto 36px; }
+.contact-band .hero-ctas{ justify-content:center; }
+.contact-lines{ margin-top:40px; font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--text-soft); display:flex; gap:28px; justify-content:center; flex-wrap:wrap; }
+.contact-lines a{ color:var(--text); text-decoration:none; border-bottom:1px solid var(--line-strong); transition:border-color 160ms var(--ease-out), color 160ms var(--ease-out); }
+.contact-lines a:hover{ color:var(--accent); border-color:var(--accent); }
+
+footer{ padding:26px 0; text-align:center; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--text-soft); border-top:1px solid var(--line); }
+
+.reveal{ opacity:0; transform:translateY(24px); transition:opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
+.reveal.in{ opacity:1; transform:translateY(0); }
+@media (prefers-reduced-motion: reduce){ .reveal{ opacity:1; transform:none; transition:none; } }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<header class="site">
+  <nav class="site">
+    <a href="#top" class="word"><svg class="bell-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 17.2h15"/><path d="M6 17.2a6 6 0 0 1 12 0"/><circle cx="12" cy="10.3" r="1.15" fill="currentColor" stroke="none"/><path d="M9.3 7.6 8 6.3M14.7 7.6 16 6.3"/></svg>Impulse<em>IA</em></a>
+    <div class="nav-links">
+      <a href="#que-hago" class="hide-narrow" data-i18n="nav_servicios">Servicios</a>
+      <a href="#proyectos" class="hide-narrow" data-i18n="nav_proyectos">Proyectos</a>
+      <a href="#demo" class="hide-narrow" data-i18n="nav_demo">Demo</a>
+      <a href="#preguntas" class="hide-narrow" data-i18n="nav_preguntas">Preguntas</a>
+      <div class="lang-switch" id="langSwitch" role="group" data-i18n-aria="lang_switch_aria" aria-label="Cambiar idioma">
+        <button type="button" data-lang="es" class="active">ES</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <button id="themeToggle" class="theme-toggle" data-i18n-aria="theme_toggle_dark" aria-label="Cambiar a modo oscuro" aria-pressed="false">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.2 19.8l1.8-1.8M18 6l1.8-1.8"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+      <a href="#contacto" class="btn btn-primary magnetic" data-i18n="nav_cta">Hablemos</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero" style="padding:0;">
+    <canvas id="hero-canvas"></canvas>
+    <div class="wrap">
+      <div class="hero-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 17.2h15"/><path d="M6 17.2a6 6 0 0 1 12 0"/><circle cx="12" cy="10.3" r="1.15" fill="currentColor" stroke="none"/><path d="M9.3 7.6 8 6.3M14.7 7.6 16 6.3"/></svg><span data-i18n="hero_eyebrow">Soluciones con IA para pymes</span></div>
+      <h1 id="heroTitle">
+        <span class="word-wrap"><span class="word-inner">Invertí</span></span> <span class="word-wrap"><span class="word-inner">una</span></span> <span class="word-wrap"><span class="word-inner">vez.</span></span><br>
+        <span class="word-wrap"><span class="word-inner">Reducí</span></span> <span class="word-wrap"><span class="word-inner"><em>costos</em></span></span> <span class="word-wrap"><span class="word-inner">el</span></span> <span class="word-wrap"><span class="word-inner">resto</span></span> <span class="word-wrap"><span class="word-inner">del</span></span> <span class="word-wrap"><span class="word-inner">año.</span></span>
+      </h1>
+      <p class="lede" data-i18n="hero_lede">Empleados digitales, chatbots y automatizaciones a medida que trabajan las 24 horas, sin vacaciones, y bajan los costos fijos de tu negocio.</p>
+      <div class="hero-ctas">
+        <a href="#contacto" class="btn btn-primary magnetic" data-i18n="nav_cta">Hablemos</a>
+        <a href="#demo" class="btn btn-ghost magnetic" data-i18n="hero_cta_secondary">Ver una demo</a>
+      </div>
+    </div>
+    <div class="scroll-cue"><span class="line"></span><span data-i18n="scroll_cue">Scroll</span></div>
+  </section>
+
+  <section class="brand-statement">
+    <svg class="bell-mark bell-mark-big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 17.2h15"/><path d="M6 17.2a6 6 0 0 1 12 0"/><circle cx="12" cy="10.3" r="1.15" fill="currentColor" stroke="none"/><path d="M9.3 7.6 8 6.3M14.7 7.6 16 6.3"/></svg><h2 class="brand-huge"><span class="bh1" id="bh1">Impulse</span><span class="bh2" id="bh2">IA</span></h2>
+  </section>
+
+  <div class="marquee-band">
+    <div class="marquee-track" id="marqueeTrack">
+      <span>Chatbots 24/7</span><span>Empleados digitales</span><span>Gestor de turnos</span><span>Páginas web</span><span>Control de stock</span><span>Contaduría automatizada</span><span>Soluciones a medida</span>
+      <span>Chatbots 24/7</span><span>Empleados digitales</span><span>Gestor de turnos</span><span>Páginas web</span><span>Control de stock</span><span>Contaduría automatizada</span><span>Soluciones a medida</span>
+    </div>
+  </div>
+
+  <section class="kinetic-block">
+    <div class="wrap">
+      <p class="kinetic-text" id="kineticText">Soy Bernardita, y pasé años en atención al cliente en distintos rubros: salud, turismo, hotelería y call center. Sé de lo que hablo: sé cuánto cuesta atender bien, cuánto tiempo se va en responder mensajes y dónde se pierden los clientes. Hoy sumo habilidades sólidas en inteligencia artificial para resolverlo. La solución que te ofrecemos hace que tus costos sean más bajos desde mañana: se invierte una vez en automatizar y se reduce un gasto fijo durante el resto del año.</p>
+      <p class="signoff">— Bernardita González Cebrián, ImpulseIA</p>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div class="wrap">
+      <div class="demo-grid">
+        <div class="demo-copy reveal">
+          <span class="section-tag" data-i18n="demo_tag">Demo en vivo</span>
+          <h2 data-i18n="demo_h2">Así atiende un empleado digital cuando nadie puede.</h2>
+          <p class="lede" data-i18n="demo_lede">Un ejemplo ilustrativo de atención automatizada: entiende la consulta, ofrece horarios disponibles, agenda el turno y deriva a una persona lo que lo necesita.</p>
+          <div class="demo-list">
+            <div class="item" data-i18n-html="demo_item1_html"><b>24 horas, sin vacaciones</b> — atiende incluso fuera de horario.</div>
+            <div class="item" data-i18n-html="demo_item2_html"><b>Agenda y confirma</b> — turnos, recordatorios y consultas frecuentes, sin intervención.</div>
+            <div class="item" data-i18n-html="demo_item3_html"><b>A tu medida</b> — entrenado con los precios, horarios y servicios reales de tu negocio.</div>
+          </div>
+        </div>
+        <div class="phone reveal">
+          <div class="phone-head">
+            <div class="avatar">IA</div>
+            <div class="who">
+              <div class="name" data-i18n="phone_name">ImpulseIA — Asistente</div>
+              <div class="status"><span class="d"></span><span data-i18n="phone_status">en línea</span></div>
+            </div>
+          </div>
+          <div class="phone-body" id="phoneBody"></div>
+          <div class="phone-foot" data-i18n="phone_foot">Ejemplo ilustrativo de un asistente de turnos y consultas</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="que-hago">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="section-tag" data-i18n="servicios_tag">Lo que ofrecemos</span>
+        <h2 data-i18n="servicios_h2">Servicios</h2>
+        <p data-i18n="servicios_lede">Siete formas concretas de reducir costos fijos y recuperar horas, sin que tu equipo tenga que aprender a programar.</p>
+      </div>
+      <div class="offers-grid">
+        <div class="offer-cluster reveal">
+          <h3 data-i18n="cluster1_h3">Atención y ventas</h3>
+          <div class="offer-row"><div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9A1.5 1.5 0 0 1 18.5 16H9l-4 4v-4H5.5A1.5 1.5 0 0 1 4 14.5z"/></svg></div><div class="offer-text"><div class="name" data-i18n="offer1_name">Chatbots para WhatsApp, web y redes</div><div class="desc" data-i18n="offer1_desc">Responden al instante consultas de precios, horarios y servicios, a cualquier hora del día.</div></div></div>
+          <div class="offer-row"><div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div><div class="offer-text"><div class="name" data-i18n="offer2_name">Empleados digitales</div><div class="desc" data-i18n="offer2_desc">Agentes de IA que se encargan de tareas administrativas y de atención las 24 horas, sin vacaciones ni licencias.</div></div></div>
+          <div class="offer-row"><div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16"/><path d="M8 3v3M16 3v3"/><path d="M8 13.5l2.5 2.5L15 12"/></svg></div><div class="offer-text"><div class="name" data-i18n="offer3_name">Gestor de turnos</div><div class="desc" data-i18n="offer3_desc">Agenda, confirma y reprograma citas de forma automática, con recordatorios para reducir ausencias.</div></div></div>
+          <div class="offer-row"><div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/><circle cx="6.3" cy="7" r="0.6" fill="currentColor" stroke="none"/></svg></div><div class="offer-text"><div class="name" data-i18n="offer4_name">Creación de páginas web</div><div class="desc" data-i18n="offer4_desc">Sitios claros, rápidos y pensados para convertir visitas en consultas y clientes.</div></div></div>
+        </div>
+        <div class="offer-cluster reveal">
+          <h3 data-i18n="cluster2_h3">Gestión y administración</h3>
+          <div class="offer-row"><div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5L12 12l8-4.5"/><path d="M12 12v9"/></svg></div><div class="offer-text"><div class="name" data-i18n="offer5_name">Control de stock</div><div class="desc" data-i18n="offer5_desc">Seguimiento de existencias y alertas de reposición, para no perder ventas ni inmovilizar dinero.</div></div></div>
+          <div class="offer-row"><div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 15v-4M12 15V8M16 15v-6"/></svg></div><div class="offer-text"><div class="name" data-i18n="offer6_name">Contaduría automatizada</div><div class="desc" data-i18n="offer6_desc">Orden de ingresos, egresos y comprobantes, con reportes automáticos para ver los números claros.</div></div></div>
+          <div class="offer-row"><div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4V3.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 15 3.6V4"/><path d="M8.5 11.5l2 2 4-4"/></svg></div><div class="offer-text"><div class="name" data-i18n="offer7_name">Soluciones personalizadas</div><div class="desc" data-i18n="offer7_desc">Si tu problema no está en la lista, lo analizamos y creamos la solución a medida.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="proyectos">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="section-tag" data-i18n="proyectos_tag">Portfolio</span>
+        <h2 data-i18n="proyectos_h2">Proyectos</h2>
+        <p data-i18n="proyectos_lede">Algunos de los sistemas que ya desarrollamos, en distintos rubros.</p>
+      </div>
+    </div>
+    <div class="carousel-wrap reveal">
+      <div class="carousel-track" id="carouselTrack">
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="14" height="10" rx="2"/><path d="M17 10l4-2.4v8.8L17 14"/></svg></div><span class="project-tag" data-i18n="project1_tag">Video · Recorridos</span><h3 data-i18n="project1_h3">Videos de recorrido en 3D</h3><p data-i18n="project1_desc">Recorridos virtuales de espacios, para que el cliente conozca el lugar antes de decidir.</p></article>
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><ellipse cx="12" cy="12" rx="3.4" ry="8"/><path d="M4 12h16"/></svg></div><span class="project-tag" data-i18n="project2_tag">Gastronomía · Traducción</span><h3 data-i18n="project2_h3">Traductor de menús</h3><p data-i18n="project2_desc">Menús que cambian todos los días, traducidos y adaptados a varios idiomas en minutos.</p></article>
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5L12 12l8-4.5"/><path d="M12 12v9"/></svg></div><span class="project-tag" data-i18n="project3_tag">Stock · Gestión</span><h3 data-i18n="project3_h3">Control de stock con análisis diarios</h3><p data-i18n="project3_desc">Seguimiento de existencias y rotación, para decidir qué reponer, qué destacar y qué dar de baja.</p></article>
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9A1.5 1.5 0 0 1 18.5 16H9l-4 4v-4H5.5A1.5 1.5 0 0 1 4 14.5z"/></svg></div><span class="project-tag" data-i18n="project4_tag">Atención · Multilingüe</span><h3 data-i18n="project4_h3">Agentes de mensajería multilingües</h3><p data-i18n="project4_desc">Responden en los idiomas que se necesiten, por chatbot y conectados a la casilla de correo.</p></article>
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="12" height="15" rx="1.5"/><path d="M7 9h6M7 12.5h6M7 16h3"/><circle cx="17.5" cy="17.5" r="3"/><path d="M19.8 19.8L22 22"/></svg></div><span class="project-tag" data-i18n="project5_tag">Datos · Reservas</span><h3 data-i18n="project5_h3">Análisis y control de reservas</h3><p data-i18n="project5_desc">Información clara de reservas y clientes antes de que lleguen, para anticipar lo que van a necesitar.</p></article>
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16"/><path d="M8 3v3M16 3v3"/><path d="M8 13.5l2.5 2.5L15 12"/></svg></div><span class="project-tag" data-i18n="project6_tag">Marketing · Contenido</span><h3 data-i18n="project6_h3">Asistente de marketing</h3><p data-i18n="project6_desc">Crea y organiza el calendario de contenido y las piezas gráficas, listo para publicar.</p></article>
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 15v-4M12 15V8M16 15v-6"/></svg></div><span class="project-tag" data-i18n="project7_tag">Administración · CRM</span><h3 data-i18n="project7_h3">CRM a medida</h3><p data-i18n="project7_desc">Consultas, recordatorios, pagos, facturas y pedidos especiales en un solo sistema, para que nada se pierda.</p></article>
+          <article class="project-card"><div class="project-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div><span class="project-tag" data-i18n="project8_tag">Transporte · Turnos</span><h3 data-i18n="project8_h3">Planificador de turnos de conductores</h3><p data-i18n="project8_desc">Organiza los horarios del personal respetando la normativa laboral vigente, y planifica en minutos.</p></article>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-btn" id="carPrev" data-i18n-aria="carousel_prev_aria" aria-label="Proyecto anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="carousel-dots" id="carDots"></div>
+        <button class="carousel-btn" id="carNext" data-i18n-aria="carousel_next_aria" aria-label="Proyecto siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature-band">
+    <div class="wrap">
+      <div class="feature-grid">
+        <div class="reveal">
+          <span class="section-tag" data-i18n="feature_tag">Primer paso sin costo</span>
+          <h2 data-i18n="feature_h2">Diagnóstico gratuito de tu negocio.</h2>
+          <p class="lede" data-i18n="feature_lede">En una conversación identificamos qué tareas te quitan más tiempo y cuáles se pueden automatizar, y estimamos cuánto podrías reducir en costos fijos. Sin compromiso.</p>
+          <div class="hero-ctas"><a href="#contacto" class="btn btn-ghost magnetic" data-i18n="nav_cta">Hablemos</a><a href="https://wa.me/393757916272" class="btn btn-ghost magnetic" data-i18n="contact_cta_whatsapp">Escribir por WhatsApp</a></div>
+        </div>
+        <div class="mock-panel reveal" id="mockPanel">
+          <span class="mock-badge-top" data-i18n="mock_badge">Diagnóstico gratuito</span>
+          <div class="process-flow">
+            <div class="process-step">
+              <div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9A1.5 1.5 0 0 1 18.5 16H9l-4 4v-4H5.5A1.5 1.5 0 0 1 4 14.5z"/></svg></div>
+              <span class="process-label" data-i18n="process_label1">Conversación inicial</span>
+            </div>
+            <span class="process-arrow">→</span>
+            <div class="process-step">
+              <div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5L12 12l8-4.5"/><path d="M12 12v9"/></svg></div>
+              <span class="process-label" data-i18n="process_label2">Diseñamos la solución</span>
+            </div>
+            <span class="process-arrow">→</span>
+            <div class="process-step">
+              <div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-3-7-7-1z"/></svg></div>
+              <span class="process-label" data-i18n="process_label3">La ponemos a trabajar</span>
+            </div>
+          </div>
+          <div class="mock-row"><span class="mock-label" data-i18n="mock_label1">Costo</span><span class="mock-val" data-i18n="mock_val1">Sin cargo</span></div>
+          <div class="mock-row" style="border:none;"><span class="mock-label" data-i18n="mock_label2">Siguiente paso</span><span class="mock-val" data-i18n="mock_val2">Propuesta a medida</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="quiet-note reveal">
+        <p data-i18n-html="quiet_p1_html"><strong>¿Ya hiciste la cuenta de cuánto cuesta hoy responder mensajes, agendar turnos y cargar datos a mano?</strong> ¿Y cuánto costaría un empleado digital que trabaje las 24 horas, sin vacaciones?</p>
+        <p data-i18n="quiet_p2">Tu competencia seguramente ya lo tiene. Es hora de adaptarse: para mejorar tu negocio y para dar a tus clientes una mejor experiencia. Una inversión hoy en automatizaciones reduce un gasto fijo el resto del año.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="preguntas">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="section-tag" data-i18n="faq_tag">Antes de contactarnos</span>
+        <h2 data-i18n="faq_h2">Preguntas frecuentes</h2>
+        <p data-i18n="faq_lede">Las dudas más comunes antes de dar el primer paso.</p>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item"><button class="faq-q"><span data-i18n="faq1_q">¿Mi equipo necesita saber de tecnología para usarlo?</span><span class="plus"></span></button><div class="faq-a"><p data-i18n="faq1_a">No. Cada solución se entrega lista para usar, con una puesta en marcha guiada y sin necesidad de saber programar.</p></div></div>
+        <div class="faq-item"><button class="faq-q"><span data-i18n="faq2_q">¿Cuánto cuesta y cuándo se recupera la inversión?</span><span class="plus"></span></button><div class="faq-a"><p data-i18n="faq2_a">Depende de lo que se automatice. La idea es invertir una vez y reducir un gasto fijo durante el resto del año. En el diagnóstico gratuito calculamos juntos cuánto tardaría en recuperarse, y el precio se acuerda por escrito antes de empezar.</p></div></div>
+        <div class="faq-item"><button class="faq-q"><span data-i18n="faq3_q">¿Puedo seguir usando las herramientas que ya tengo?</span><span class="plus"></span></button><div class="faq-a"><p data-i18n="faq3_a">Sí. Las soluciones se arman para convivir con WhatsApp, Excel, el correo y los programas que ya se usan, sin reemplazarlos de un día para el otro.</p></div></div>
+        <div class="faq-item"><button class="faq-q"><span data-i18n="faq4_q">¿Y si un cliente prefiere hablar con una persona?</span><span class="plus"></span></button><div class="faq-a"><p data-i18n="faq4_a">El asistente deriva la conversación a tu equipo cuando hace falta, con el contexto ya resumido para que nadie tenga que repetir nada.</p></div></div>
+        <div class="faq-item"><button class="faq-q"><span data-i18n="faq5_q">¿Mis datos y los de mis clientes están seguros?</span><span class="plus"></span></button><div class="faq-a"><p data-i18n="faq5_a">La privacidad es una condición, no un detalle. Antes de empezar se define cómo se guardan los datos, y se trabaja respetando la normativa de cada país.</p></div></div>
+        <div class="faq-item"><button class="faq-q"><span data-i18n="faq6_q">Si más adelante quiero cambiar de proveedor, ¿me quedo con algo?</span><span class="plus"></span></button><div class="faq-a"><p data-i18n="faq6_a">Sí. Lo que se construye es tuyo y no hay dependencia para seguir usándolo.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contacto" class="contact-band">
+    <canvas id="contact-canvas"></canvas>
+    <div class="wrap">
+      <h2 class="reveal" data-i18n-html="contact_h2_html">Hablemos de tu <em>negocio</em>.</h2>
+      <p class="lede reveal" data-i18n="contact_lede">Una conversación alcanza para empezar: cómo trabaja hoy tu equipo, qué tareas se llevan más tiempo y qué se puede automatizar. Sin compromiso.</p>
+      <div class="hero-ctas reveal">
+        <a href="https://wa.me/393757916272" class="btn btn-primary magnetic" data-i18n="contact_cta_whatsapp">Escribir por WhatsApp</a>
+        <a href="mailto:impulseiaa@gmail.com" class="btn btn-ghost magnetic" data-i18n="contact_cta_mail">Enviar un mail</a>
+      </div>
+      <div class="contact-lines reveal">
+        <a href="mailto:impulseiaa@gmail.com">impulseiaa@gmail.com</a>
+        <a href="https://wa.me/393757916272">+39 375 791 6272</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>ImpulseIA — Bernardita González Cebrián</footer>
+
+<script>
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canHover = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(!canHover){ document.documentElement.classList.add('no-hover'); }
+
+  /* ---------- i18n: translations (ES / EN / IT) ---------- */
+  // The hero title is built word-by-word (for the stagger reveal) and needs
+  // to know which word in which line gets the accent-colored <em>, so it's
+  // kept as structured line/word data rather than a plain string.
+  var HERO_LINES = {
+    es: [{"words":["Invertí","una","vez."]},{"words":["Reducí","costos","el","resto","del","año."],"emphasis":1}],
+    en: [{"words":["Invest","once."]},{"words":["Cut","costs","the","rest","of","the","year."],"emphasis":1}]
+  };
+  var MARQUEE = {
+    es: ["Chatbots 24/7", "Empleados digitales", "Gestor de turnos", "Páginas web", "Control de stock", "Contaduría automatizada", "Soluciones a medida"],
+    en: ["24/7 chatbots", "Digital employees", "Appointment manager", "Websites", "Stock control", "Automated bookkeeping", "Custom solutions"]
+  };
+  var I18N = {
+    es: {
+      nav_servicios: "Servicios",
+      nav_proyectos: "Proyectos",
+      nav_demo: "Demo",
+      nav_preguntas: "Preguntas",
+      nav_cta: "Hablemos",
+      lang_switch_aria: "Cambiar idioma",
+      theme_toggle_dark: "Cambiar a modo oscuro",
+      theme_toggle_light: "Cambiar a modo claro",
+      hero_eyebrow: "Soluciones con IA para pymes",
+      hero_lede: "Empleados digitales, chatbots y automatizaciones a medida que trabajan las 24 horas, sin vacaciones, y bajan los costos fijos de tu negocio.",
+      hero_cta_secondary: "Ver una demo",
+      scroll_cue: "Scroll",
+      kinetic_text: "Soy Bernardita, y pasé años en atención al cliente en distintos rubros: salud, turismo, hotelería y call center. Sé de lo que hablo: sé cuánto cuesta atender bien, cuánto tiempo se va en responder mensajes y dónde se pierden los clientes. Hoy sumo habilidades sólidas en inteligencia artificial para resolverlo. La solución que te ofrecemos hace que tus costos sean más bajos desde mañana: se invierte una vez en automatizar y se reduce un gasto fijo durante el resto del año.",
+      demo_tag: "Demo en vivo",
+      demo_h2: "Así atiende un empleado digital cuando nadie puede.",
+      demo_lede: "Un ejemplo ilustrativo de atención automatizada: entiende la consulta, ofrece horarios disponibles, agenda el turno y deriva a una persona lo que lo necesita.",
+      demo_item1_html: "<b>24 horas, sin vacaciones</b> — atiende incluso fuera de horario.",
+      demo_item2_html: "<b>Agenda y confirma</b> — turnos, recordatorios y consultas frecuentes, sin intervención.",
+      demo_item3_html: "<b>A tu medida</b> — entrenado con los precios, horarios y servicios reales de tu negocio.",
+      phone_name: "ImpulseIA — Asistente",
+      phone_status: "en línea",
+      phone_foot: "Ejemplo ilustrativo de un asistente de turnos y consultas",
+      servicios_tag: "Lo que ofrecemos",
+      servicios_h2: "Servicios",
+      servicios_lede: "Siete formas concretas de reducir costos fijos y recuperar horas, sin que tu equipo tenga que aprender a programar.",
+      cluster1_h3: "Atención y ventas",
+      cluster2_h3: "Gestión y administración",
+      offer1_name: "Chatbots para WhatsApp, web y redes",
+      offer1_desc: "Responden al instante consultas de precios, horarios y servicios, a cualquier hora del día.",
+      offer2_name: "Empleados digitales",
+      offer2_desc: "Agentes de IA que se encargan de tareas administrativas y de atención las 24 horas, sin vacaciones ni licencias.",
+      offer3_name: "Gestor de turnos",
+      offer3_desc: "Agenda, confirma y reprograma citas de forma automática, con recordatorios para reducir ausencias.",
+      offer4_name: "Creación de páginas web",
+      offer4_desc: "Sitios claros, rápidos y pensados para convertir visitas en consultas y clientes.",
+      offer5_name: "Control de stock",
+      offer5_desc: "Seguimiento de existencias y alertas de reposición, para no perder ventas ni inmovilizar dinero.",
+      offer6_name: "Contaduría automatizada",
+      offer6_desc: "Orden de ingresos, egresos y comprobantes, con reportes automáticos para ver los números claros.",
+      offer7_name: "Soluciones personalizadas",
+      offer7_desc: "Si tu problema no está en la lista, lo analizamos y creamos la solución a medida.",
+      proyectos_tag: "Portfolio",
+      proyectos_h2: "Proyectos",
+      proyectos_lede: "Algunos de los sistemas que ya desarrollamos, en distintos rubros.",
+      project1_tag: "Video · Recorridos",
+      project1_h3: "Videos de recorrido en 3D",
+      project1_desc: "Recorridos virtuales de espacios, para que el cliente conozca el lugar antes de decidir.",
+      project2_tag: "Gastronomía · Traducción",
+      project2_h3: "Traductor de menús",
+      project2_desc: "Menús que cambian todos los días, traducidos y adaptados a varios idiomas en minutos.",
+      project3_tag: "Stock · Gestión",
+      project3_h3: "Control de stock con análisis diarios",
+      project3_desc: "Seguimiento de existencias y rotación, para decidir qué reponer, qué destacar y qué dar de baja.",
+      project4_tag: "Atención · Multilingüe",
+      project4_h3: "Agentes de mensajería multilingües",
+      project4_desc: "Responden en los idiomas que se necesiten, por chatbot y conectados a la casilla de correo.",
+      project5_tag: "Datos · Reservas",
+      project5_h3: "Análisis y control de reservas",
+      project5_desc: "Información clara de reservas y clientes antes de que lleguen, para anticipar lo que van a necesitar.",
+      project6_tag: "Marketing · Contenido",
+      project6_h3: "Asistente de marketing",
+      project6_desc: "Crea y organiza el calendario de contenido y las piezas gráficas, listo para publicar.",
+      project7_tag: "Administración · CRM",
+      project7_h3: "CRM a medida",
+      project7_desc: "Consultas, recordatorios, pagos, facturas y pedidos especiales en un solo sistema, para que nada se pierda.",
+      project8_tag: "Transporte · Turnos",
+      project8_h3: "Planificador de turnos de conductores",
+      project8_desc: "Organiza los horarios del personal respetando la normativa laboral vigente, y planifica en minutos.",
+      carousel_prev_aria: "Proyecto anterior",
+      carousel_next_aria: "Proyecto siguiente",
+      feature_tag: "Primer paso sin costo",
+      feature_h2: "Diagnóstico gratuito de tu negocio.",
+      feature_lede: "En una conversación identificamos qué tareas te quitan más tiempo y cuáles se pueden automatizar, y estimamos cuánto podrías reducir en costos fijos. Sin compromiso.",
+      mock_badge: "Diagnóstico gratuito",
+      process_label1: "Conversación inicial",
+      process_label2: "Diseñamos la solución",
+      process_label3: "La ponemos a trabajar",
+      mock_label1: "Costo",
+      mock_val1: "Sin cargo",
+      mock_label2: "Siguiente paso",
+      mock_val2: "Propuesta a medida",
+      quiet_p1_html: "<strong>¿Ya hiciste la cuenta de cuánto cuesta hoy responder mensajes, agendar turnos y cargar datos a mano?</strong> ¿Y cuánto costaría un empleado digital que trabaje las 24 horas, sin vacaciones?",
+      quiet_p2: "Tu competencia seguramente ya lo tiene. Es hora de adaptarse: para mejorar tu negocio y para dar a tus clientes una mejor experiencia. Una inversión hoy en automatizaciones reduce un gasto fijo el resto del año.",
+      faq_tag: "Antes de contactarnos",
+      faq_h2: "Preguntas frecuentes",
+      faq_lede: "Las dudas más comunes antes de dar el primer paso.",
+      faq1_q: "¿Mi equipo necesita saber de tecnología para usarlo?",
+      faq1_a: "No. Cada solución se entrega lista para usar, con una puesta en marcha guiada y sin necesidad de saber programar.",
+      faq2_q: "¿Cuánto cuesta y cuándo se recupera la inversión?",
+      faq2_a: "Depende de lo que se automatice. La idea es invertir una vez y reducir un gasto fijo durante el resto del año. En el diagnóstico gratuito calculamos juntos cuánto tardaría en recuperarse, y el precio se acuerda por escrito antes de empezar.",
+      faq3_q: "¿Puedo seguir usando las herramientas que ya tengo?",
+      faq3_a: "Sí. Las soluciones se arman para convivir con WhatsApp, Excel, el correo y los programas que ya se usan, sin reemplazarlos de un día para el otro.",
+      faq4_q: "¿Y si un cliente prefiere hablar con una persona?",
+      faq4_a: "El asistente deriva la conversación a tu equipo cuando hace falta, con el contexto ya resumido para que nadie tenga que repetir nada.",
+      faq5_q: "¿Mis datos y los de mis clientes están seguros?",
+      faq5_a: "La privacidad es una condición, no un detalle. Antes de empezar se define cómo se guardan los datos, y se trabaja respetando la normativa de cada país.",
+      faq6_q: "Si más adelante quiero cambiar de proveedor, ¿me quedo con algo?",
+      faq6_a: "Sí. Lo que se construye es tuyo y no hay dependencia para seguir usándolo.",
+      contact_h2_html: "Hablemos de tu <em>negocio</em>.",
+      contact_lede: "Una conversación alcanza para empezar: cómo trabaja hoy tu equipo, qué tareas se llevan más tiempo y qué se puede automatizar. Sin compromiso.",
+      contact_cta_whatsapp: "Escribir por WhatsApp",
+      contact_cta_mail: "Enviar un mail"
+    },
+    en: {
+      nav_servicios: "Services",
+      nav_proyectos: "Projects",
+      nav_demo: "Demo",
+      nav_preguntas: "FAQ",
+      nav_cta: "Let’s talk",
+      lang_switch_aria: "Change language",
+      theme_toggle_dark: "Switch to dark mode",
+      theme_toggle_light: "Switch to light mode",
+      hero_eyebrow: "AI solutions for small and mid-sized businesses",
+      hero_lede: "Digital employees, chatbots and custom automations that work 24 hours a day, with no vacations, and lower your business’s fixed costs.",
+      hero_cta_secondary: "See a demo",
+      scroll_cue: "Scroll",
+      kinetic_text: "I’m Bernardita, and I spent years in customer service across different industries: healthcare, tourism, hospitality and call centers. I know what I’m talking about: what it costs to serve customers well, how much time disappears answering messages, and where clients get lost. Today I add strong AI skills to solve it. The solution we offer brings your costs down starting tomorrow: you invest once in automation and cut a fixed expense for the rest of the year.",
+      demo_tag: "Live demo",
+      demo_h2: "This is how a digital employee answers when no one else can.",
+      demo_lede: "An illustrative example of automated customer service: it understands the request, offers available times, books the appointment and hands anything that needs a human to a person.",
+      demo_item1_html: "<b>24/7, no vacations</b> — it answers even outside business hours.",
+      demo_item2_html: "<b>Books and confirms</b> — appointments, reminders and frequent questions, hands-free.",
+      demo_item3_html: "<b>Built for you</b> — trained on your business’s real prices, hours and services.",
+      phone_name: "ImpulseIA — Assistant",
+      phone_status: "online",
+      phone_foot: "Illustrative example of an appointment and inquiry assistant",
+      servicios_tag: "What we offer",
+      servicios_h2: "Services",
+      servicios_lede: "Seven concrete ways to cut fixed costs and get hours back, without your team having to learn to code.",
+      cluster1_h3: "Customer care & sales",
+      cluster2_h3: "Management & administration",
+      offer1_name: "Chatbots for WhatsApp, web and social",
+      offer1_desc: "Instantly answer questions about prices, hours and services, at any time of day.",
+      offer2_name: "Digital employees",
+      offer2_desc: "AI agents that handle administrative and customer-facing tasks 24 hours a day, with no vacations or sick leave.",
+      offer3_name: "Appointment manager",
+      offer3_desc: "Books, confirms and reschedules appointments automatically, with reminders that reduce no-shows.",
+      offer4_name: "Website creation",
+      offer4_desc: "Clear, fast sites designed to turn visits into inquiries and customers.",
+      offer5_name: "Stock control",
+      offer5_desc: "Inventory tracking and restock alerts, so you don’t lose sales or tie up cash.",
+      offer6_name: "Automated bookkeeping",
+      offer6_desc: "Income, expenses and receipts kept in order, with automatic reports so the numbers are always clear.",
+      offer7_name: "Custom solutions",
+      offer7_desc: "If your problem isn’t on the list, we analyze it and build the solution around it.",
+      proyectos_tag: "Portfolio",
+      proyectos_h2: "Projects",
+      proyectos_lede: "Some of the systems we’ve already built, across different industries.",
+      project1_tag: "Video · Tours",
+      project1_h3: "3D walkthrough videos",
+      project1_desc: "Virtual tours of spaces, so customers can see the place before deciding.",
+      project2_tag: "Food & Beverage · Translation",
+      project2_h3: "Menu translator",
+      project2_desc: "Menus that change every day, translated and adapted into several languages in minutes.",
+      project3_tag: "Stock · Management",
+      project3_h3: "Stock control with daily analysis",
+      project3_desc: "Inventory and turnover tracking, to decide what to restock, feature or discontinue.",
+      project4_tag: "Customer care · Multilingual",
+      project4_h3: "Multilingual messaging agents",
+      project4_desc: "They reply in whatever languages are needed, via chatbot and connected to your inbox.",
+      project5_tag: "Data · Bookings",
+      project5_h3: "Booking analysis and control",
+      project5_desc: "Clear information on bookings and customers before they arrive, to anticipate what they’ll need.",
+      project6_tag: "Marketing · Content",
+      project6_h3: "Marketing assistant",
+      project6_desc: "Builds and organizes the content calendar and graphic assets, ready to publish.",
+      project7_tag: "Administration · CRM",
+      project7_h3: "Custom CRM",
+      project7_desc: "Inquiries, reminders, payments, invoices and special requests in a single system, so nothing slips through.",
+      project8_tag: "Transport · Scheduling",
+      project8_h3: "Driver shift planner",
+      project8_desc: "Organizes staff schedules in line with current labor regulations, and plans in minutes.",
+      carousel_prev_aria: "Previous project",
+      carousel_next_aria: "Next project",
+      feature_tag: "A first step at no cost",
+      feature_h2: "Free diagnosis of your business.",
+      feature_lede: "In one conversation we identify which tasks take up most of your time and which can be automated, and estimate how much you could cut in fixed costs. No strings attached.",
+      mock_badge: "Free diagnosis",
+      process_label1: "Initial conversation",
+      process_label2: "We design the solution",
+      process_label3: "We put it to work",
+      mock_label1: "Cost",
+      mock_val1: "Free of charge",
+      mock_label2: "Next step",
+      mock_val2: "Tailored proposal",
+      quiet_p1_html: "<strong>Have you worked out what it costs today to answer messages, book appointments and enter data by hand?</strong> And what would a digital employee that works 24 hours a day, with no vacations, cost?",
+      quiet_p2: "Your competition probably has it already. It’s time to adapt: to improve your business and give your customers a better experience. An investment in automation today cuts a fixed expense for the rest of the year.",
+      faq_tag: "Before you reach out",
+      faq_h2: "Frequently asked questions",
+      faq_lede: "The most common questions before taking the first step.",
+      faq1_q: "Does my team need tech skills to use it?",
+      faq1_a: "No. Every solution is delivered ready to use, with guided onboarding and no coding required.",
+      faq2_q: "How much does it cost, and when does it pay for itself?",
+      faq2_a: "It depends on what gets automated. The idea is to invest once and cut a fixed expense for the rest of the year. In the free diagnosis we work out together how long it would take to pay off, and the price is agreed in writing before we start.",
+      faq3_q: "Can I keep using the tools I already have?",
+      faq3_a: "Yes. Solutions are built to work alongside WhatsApp, Excel, email and the software you already use, not to replace them overnight.",
+      faq4_q: "What if a customer prefers to talk to a person?",
+      faq4_a: "The assistant hands the conversation to your team whenever needed, with the context already summarized so nobody has to repeat anything.",
+      faq5_q: "Are my data and my customers’ data safe?",
+      faq5_a: "Privacy is a condition, not a detail. How data is stored is defined before we start, and we work in line with each country’s regulations.",
+      faq6_q: "If I switch providers later on, do I keep anything?",
+      faq6_a: "Yes. What gets built is yours, and you stay free to keep using it.",
+      contact_h2_html: "Let’s talk about your <em>business</em>.",
+      contact_lede: "One conversation is enough to start: how your team works today, which tasks take the most time, and what can be automated. No strings attached.",
+      contact_cta_whatsapp: "Message on WhatsApp",
+      contact_cta_mail: "Send an email"
+    }
+  };
+  var currentLang='es';
+
+  /* ---------- custom cursor ---------- */
+  if(canHover && !reduced){
+    var dot=document.getElementById('cursorDot'), ring=document.getElementById('cursorRing');
+    var mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+    window.addEventListener('mousemove', function(e){ mx=e.clientX; my=e.clientY; dot.style.transform='translate('+mx+'px,'+my+'px) translate(-50%,-50%)'; });
+    function raf(){ rx+=(mx-rx)*0.18; ry+=(my-ry)*0.18; ring.style.transform='translate('+rx+'px,'+ry+'px) translate(-50%,-50%)'; requestAnimationFrame(raf); }
+    raf();
+    document.querySelectorAll('a,button').forEach(function(el){
+      el.addEventListener('mouseenter', function(){ ring.classList.add('hover'); });
+      el.addEventListener('mouseleave', function(){ ring.classList.remove('hover'); });
+    });
+  }
+
+  /* ---------- theme toggle ---------- */
+  function updateThemeToggleAria(){
+    var toggle=document.getElementById('themeToggle');
+    if(!toggle) return;
+    var isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    var dict=I18N[currentLang]||I18N.es;
+    toggle.setAttribute('aria-label', isDark ? dict.theme_toggle_light : dict.theme_toggle_dark);
+  }
+  (function(){
+    var toggle=document.getElementById('themeToggle');
+    if(!toggle) return;
+    toggle.addEventListener('click', function(){
+      var cur=document.documentElement.getAttribute('data-theme');
+      var next = cur==='dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      toggle.setAttribute('aria-pressed', next==='dark' ? 'true' : 'false');
+      updateThemeToggleAria();
+      try{ localStorage.setItem('impulseia-theme', next); }catch(e){}
+    });
+    updateThemeToggleAria();
+  })();
+
+  /* ---------- magnetic buttons: real spring physics (no external library needed) ---------- */
+  if(canHover && !reduced){
+    var STIFFNESS=0.16, DAMPING=0.78;
+    document.querySelectorAll('.magnetic').forEach(function(el){
+      var state={ tx:0, ty:0, x:0, y:0, vx:0, vy:0, running:false };
+      function tick(){
+        var ax=(state.tx-state.x)*STIFFNESS, ay=(state.ty-state.y)*STIFFNESS;
+        state.vx=(state.vx+ax)*DAMPING; state.vy=(state.vy+ay)*DAMPING;
+        state.x+=state.vx; state.y+=state.vy;
+        el.style.transform='translate('+state.x.toFixed(2)+'px,'+state.y.toFixed(2)+'px)';
+        if(Math.abs(state.vx)>0.02||Math.abs(state.vy)>0.02||Math.abs(state.tx-state.x)>0.05||Math.abs(state.ty-state.y)>0.05){
+          requestAnimationFrame(tick);
+        } else { state.running=false; }
+      }
+      function start(){ if(!state.running){ state.running=true; requestAnimationFrame(tick); } }
+      el.addEventListener('mousemove', function(e){
+        var r=el.getBoundingClientRect();
+        state.tx=(e.clientX-r.left-r.width/2)*0.32;
+        state.ty=(e.clientY-r.top-r.height/2)*0.4;
+        start();
+      });
+      el.addEventListener('mouseleave', function(){ state.tx=0; state.ty=0; start(); });
+    });
+  }
+
+  /* ---------- hero title stagger ---------- */
+  // Rebuilds #heroTitle's word-by-word markup from a per-language line/word
+  // list (see HERO_LINES below) and replays the stagger reveal. Called once
+  // at load, and again on every language switch.
+  function buildHeroTitle(lines){
+    var heroTitle=document.getElementById('heroTitle');
+    if(!heroTitle) return;
+    heroTitle.innerHTML='';
+    lines.forEach(function(line, li){
+      var lineWrap=document.createElement('span'); lineWrap.style.whiteSpace='nowrap';
+      line.words.forEach(function(w, wi){
+        var wrap=document.createElement('span'); wrap.className='word-wrap';
+        var inner=document.createElement('span'); inner.className='word-inner';
+        if(line.emphasis===wi){ var em=document.createElement('em'); em.textContent=w; inner.appendChild(em); }
+        else { inner.textContent=w; }
+        wrap.appendChild(inner);
+        lineWrap.appendChild(wrap);
+        lineWrap.appendChild(document.createTextNode(' '));
+      });
+      heroTitle.appendChild(lineWrap);
+      if(li<lines.length-1){ heroTitle.appendChild(document.createElement('br')); }
+    });
+    var words=heroTitle.querySelectorAll('.word-inner');
+    if(reduced){ words.forEach(function(w){ w.style.transform='translateY(0)'; }); }
+    else{
+      words.forEach(function(w,i){
+        w.style.transition='transform 820ms cubic-bezier(0.16,1,0.3,1)';
+        w.style.transitionDelay=(i*55)+'ms';
+        w.style.transform='translateY(100%)';
+      });
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ words.forEach(function(w){ w.style.transform='translateY(0)'; }); }); });
+    }
+    fitHeroTitle();
+  }
+  // Each hero line is forced onto a single row (no mid-line wrapping); on
+  // narrow screens the un-scaled text can be wider than the available
+  // space, so this shrinks the h1's font-size just enough for the widest
+  // line to fit without being clipped by the hero section's overflow.
+  function fitHeroTitle(){
+    var heroTitle=document.getElementById('heroTitle');
+    if(!heroTitle) return;
+    var wrap=heroTitle.parentElement || heroTitle;
+    var heroSection=wrap.closest('.hero') || wrap;
+    heroTitle.style.fontSize='';
+    var wrapStyle=getComputedStyle(wrap);
+    var available=Math.min(heroSection.clientWidth - parseFloat(wrapStyle.paddingLeft||0) - parseFloat(wrapStyle.paddingRight||0), heroSection.getBoundingClientRect().right - heroTitle.getBoundingClientRect().left - 70);
+    var lineSpans=heroTitle.querySelectorAll(':scope > span');
+    var maxWidth=0;
+    lineSpans.forEach(function(s){ maxWidth=Math.max(maxWidth, s.getBoundingClientRect().width); });
+    if(maxWidth>available && available>0){
+      var currentSize=parseFloat(getComputedStyle(heroTitle).fontSize);
+      var newSize=Math.floor(currentSize*(available/maxWidth)*0.985);
+      heroTitle.style.fontSize=newSize+'px';
+    }
+  }
+  var fitHeroTitleResizeTimer=null;
+  window.addEventListener('resize', function(){
+    clearTimeout(fitHeroTitleResizeTimer);
+    fitHeroTitleResizeTimer=setTimeout(fitHeroTitle, 150);
+  }, {passive:true});
+  buildHeroTitle(HERO_LINES.es);
+
+  /* ---------- brand statement parallax ---------- */
+  (function(){
+    var bh1=document.getElementById('bh1'), bh2=document.getElementById('bh2');
+    if(!bh1||!bh2||reduced) return;
+    var section=bh1.closest('.brand-statement');
+    function update(){
+      var r=section.getBoundingClientRect();
+      var vh=window.innerHeight;
+      var p=(vh-r.top)/(r.height+vh);
+      p=Math.max(0,Math.min(1,p));
+      var shift=(p-0.5)*70;
+      bh1.style.transform='translateX('+(-shift)+'px)';
+      bh2.style.transform='translateX('+(shift)+'px)';
+    }
+    document.addEventListener('scroll', update, { passive:true });
+    update();
+  })();
+
+  /* ---------- scroll reveals ---------- */
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window) || reduced){ els.forEach(function(e){ e.classList.add('in'); }); }
+  else{
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry,i){
+        if(entry.isIntersecting){
+          setTimeout(function(){ entry.target.classList.add('in'); }, i*60);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold:0.15 });
+    els.forEach(function(e){ io.observe(e); });
+  }
+
+  /* ---------- kinetic text scroll-lit ---------- */
+  var buildKinetic = (function(){
+    var container=document.getElementById('kineticText');
+    if(!container) return function(){};
+    function update(){
+      var spans=container.querySelectorAll('.kw');
+      var r=container.getBoundingClientRect();
+      var vh=window.innerHeight;
+      var progress=(vh*0.8-r.top)/(r.height+vh*0.3);
+      progress=Math.max(0,Math.min(1,progress));
+      var litCount=Math.floor(progress*spans.length);
+      spans.forEach(function(s,i){ if(i<litCount){ s.classList.add('lit'); } else { s.classList.remove('lit'); } });
+    }
+    document.addEventListener('scroll', update, { passive:true });
+    return function build(text){
+      var words=text.trim().split(/\s+/);
+      container.innerHTML='';
+      words.forEach(function(w){
+        var span=document.createElement('span');
+        span.className='kw'+(w.replace(/[.,:;]/g,'')==='ImpulseIA' ? ' accent':'');
+        span.textContent=w+' ';
+        container.appendChild(span);
+      });
+      if(reduced){ container.querySelectorAll('.kw').forEach(function(s){ s.classList.add('lit'); }); return; }
+      update();
+    };
+  })();
+  buildKinetic(I18N.es.kinetic_text);
+
+  /* ---------- marquee band ---------- */
+  function buildMarquee(items){
+    var track=document.getElementById('marqueeTrack');
+    if(!track) return;
+    var html='';
+    // duplicated twice so the CSS marquee animation loops seamlessly
+    for(var rep=0; rep<2; rep++){ items.forEach(function(t){ html+='<span>'+t+'</span>'; }); }
+    track.innerHTML=html;
+  }
+  buildMarquee(MARQUEE.es);
+
+  /* ---------- WhatsApp demo ---------- */
+  (function(){
+    var body=document.getElementById('phoneBody');
+    if(!body) return;
+    var script=[
+      ["guest","Hola, ¿tienen turno para el jueves por la tarde?"],
+      ["bot","¡Hola! Sí, tenemos el jueves a las 16:30 y a las 18:00. ¿Cuál te queda mejor?"],
+      ["guest","Hi! Can I book an appointment for Friday morning?"],
+      ["bot","Hello! Yes, we have Friday at 9:00 and 11:30. Which one works better for you?"],
+      ["guest","Son las 23:40, ¿atienden a esta hora?"],
+      ["bot","Estoy disponible las 24 horas. ¿En qué puedo ayudarte?"],
+    ];
+    var i=0, running=false, timers=[];
+    function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+    function addTyping(){
+      var t=document.createElement('div'); t.className='typing';
+      t.innerHTML='<span></span><span></span><span></span>';
+      body.appendChild(t); requestAnimationFrame(function(){ t.classList.add('in'); });
+      return t;
+    }
+    function addBubble(role,text){
+      var b=document.createElement('div'); b.className='bubble '+role; b.textContent=text;
+      body.appendChild(b); requestAnimationFrame(function(){ b.classList.add('in'); });
+      while(body.children.length>5){ body.removeChild(body.firstChild); }
+    }
+    function step(){
+      if(i>=script.length){ timers.push(setTimeout(function(){ body.innerHTML=''; i=0; step(); }, 2200)); return; }
+      var pair=script[i]; var role=pair[0], text=pair[1];
+      if(role==='bot'){
+        var typing=addTyping();
+        timers.push(setTimeout(function(){ typing.remove(); addBubble('bot',text); i++; timers.push(setTimeout(step, 1300)); }, 900));
+      } else {
+        addBubble('guest',text); i++; timers.push(setTimeout(step, 1000));
+      }
+    }
+    function start(){ if(running) return; running=true; step(); }
+    if(reduced){
+      script.forEach(function(pair){ addBubble(pair[0],pair[1]); });
+    } else if('IntersectionObserver' in window){
+      var obs=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting){ start(); obs.disconnect(); } });
+      }, { threshold:0.4 });
+      obs.observe(body);
+    } else { start(); }
+  })();
+
+  /* ---------- projects carousel ---------- */
+  (function(){
+    var track=document.getElementById('carouselTrack');
+    if(!track) return;
+    var prevBtn=document.getElementById('carPrev'), nextBtn=document.getElementById('carNext');
+    var dotsWrap=document.getElementById('carDots');
+    var cards=Array.prototype.slice.call(track.querySelectorAll('.project-card'));
+    var dots=[];
+    var steps=[];
+
+    // On wide screens several cards fit in view at once, so the track can't
+    // actually scroll a full card-width for every card — the last few cards'
+    // "start" positions all collapse into the same maxScroll value. Building
+    // one dot per CARD (as before) left dots for positions the track could
+    // never reach, so the arrows looked like they stopped working partway
+    // through. Instead, compute the real reachable stop positions and build
+    // exactly one dot per stop.
+    function computeSteps(){
+      var max=Math.max(0, track.scrollWidth - track.clientWidth);
+      var raw=cards.map(function(c){
+        return Math.max(0, Math.min(c.offsetLeft - track.offsetLeft, max));
+      });
+      var out=[];
+      raw.forEach(function(v){
+        if(out.length===0 || v-out[out.length-1] > 2){ out.push(v); }
+      });
+      if(out.length===0 || out[out.length-1] < max - 2){ out.push(max); }
+      return out;
+    }
+
+    function buildDots(){
+      steps=computeSteps();
+      dotsWrap.innerHTML='';
+      dots=steps.map(function(target, i){
+        var dot=document.createElement('span');
+        dot.className='carousel-dot'+(i===0 ? ' active':'');
+        dot.addEventListener('click', function(){
+          track.scrollTo({ left: target, behavior: reduced ? 'auto':'smooth' });
+        });
+        dotsWrap.appendChild(dot);
+        return dot;
+      });
+    }
+    buildDots();
+
+    function closestStepIndex(){
+      var pos=track.scrollLeft, best=0, bestDist=Infinity;
+      steps.forEach(function(s,i){ var d=Math.abs(s-pos); if(d<bestDist){ bestDist=d; best=i; } });
+      return best;
+    }
+    prevBtn.addEventListener('click', function(){
+      var idx=Math.max(0, closestStepIndex()-1);
+      track.scrollTo({ left: steps[idx], behavior: reduced ? 'auto':'smooth' });
+    });
+    nextBtn.addEventListener('click', function(){
+      var idx=Math.min(steps.length-1, closestStepIndex()+1);
+      track.scrollTo({ left: steps[idx], behavior: reduced ? 'auto':'smooth' });
+    });
+
+    function updateDots(){
+      var idx=closestStepIndex();
+      dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+    }
+    var ticking=false;
+    track.addEventListener('scroll', function(){
+      if(!ticking){ requestAnimationFrame(function(){ updateDots(); ticking=false; }); ticking=true; }
+    }, { passive:true });
+
+    // Viewport width changes how many cards fit at once, which changes how
+    // many stops are actually reachable — recompute on resize so the dots
+    // stay in sync (e.g. rotating a phone, or resizing a desktop window).
+    var resizeTimer=null;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeTimer);
+      resizeTimer=setTimeout(function(){ buildDots(); updateDots(); }, 150);
+    });
+
+    // drag-to-scroll with mouse
+    var isDown=false, startX=0, startScroll=0, moved=false;
+    track.addEventListener('mousedown', function(e){
+      isDown=true; moved=false; track.classList.add('dragging');
+      startX=e.pageX; startScroll=track.scrollLeft;
+    });
+    window.addEventListener('mousemove', function(e){
+      if(!isDown) return;
+      var dx=e.pageX-startX;
+      if(Math.abs(dx)>4) moved=true;
+      track.scrollLeft=startScroll-dx;
+    });
+    window.addEventListener('mouseup', function(){
+      if(!isDown) return;
+      isDown=false; track.classList.remove('dragging');
+    });
+    // Safety net: if the pointer leaves the window/tab mid-drag (common with
+    // Safari trackpad gestures) without a mouseup ever firing, drop the drag
+    // state so it can't keep hijacking scroll on return.
+    window.addEventListener('blur', function(){ isDown=false; track.classList.remove('dragging'); });
+    document.addEventListener('mouseleave', function(){ isDown=false; track.classList.remove('dragging'); });
+    track.addEventListener('click', function(e){ if(moved){ e.preventDefault(); e.stopPropagation(); moved=false; } }, true);
+
+    updateDots();
+  })();
+
+  /* ---------- FAQ accordion ---------- */
+  var faqs=document.querySelectorAll('.faq-item');
+  faqs.forEach(function(item){
+    var q=item.querySelector('.faq-q'), a=item.querySelector('.faq-a');
+    q.addEventListener('click', function(){
+      var open=item.getAttribute('data-open')==='true';
+      faqs.forEach(function(other){ other.setAttribute('data-open','false'); other.querySelector('.faq-a').style.maxHeight=null; });
+      if(!open){ item.setAttribute('data-open','true'); a.style.maxHeight=a.scrollHeight+'px'; }
+    });
+  });
+
+  /* ---------- generative canvas: chaos -> order field ---------- */
+  function initField(canvasId, opts){
+    var canvas=document.getElementById(canvasId);
+    if(!canvas) return;
+    var ctx=canvas.getContext('2d');
+    var w,h,dpr=Math.min(window.devicePixelRatio||1,2);
+    var pts=[];
+    var count=opts.count;
+    var mouse={x:-9999,y:-9999};
+    var sectionEl=canvas.closest('section');
+
+    function resize(){
+      w=canvas.clientWidth; h=canvas.clientHeight;
+      canvas.width=w*dpr; canvas.height=h*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    function seed(){
+      pts=[];
+      var cols=Math.ceil(Math.sqrt(count*(w/h)));
+      var rows=Math.ceil(count/cols);
+      var gx=w/cols, gy=h/rows;
+      for(var i=0;i<cols;i++){
+        for(var j=0;j<rows;j++){
+          var tx=gx*(i+0.5), ty=gy*(j+0.5);
+          pts.push({ x:Math.random()*w, y:Math.random()*h, tx:tx, ty:ty, r:1+Math.random()*1.6, ph:Math.random()*Math.PI*2 });
+        }
+      }
+    }
+    function progress(){
+      if(!sectionEl) return 0.5;
+      var r=sectionEl.getBoundingClientRect();
+      var vh=window.innerHeight;
+      var p=(vh-r.top)/(r.height+vh);
+      return Math.max(0,Math.min(1,p));
+    }
+    var accentColor=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    var lineColor=getComputedStyle(document.documentElement).getPropertyValue('--line-strong').trim();
+
+    function frame(t){
+      if(!reduced){ requestAnimationFrame(frame); }
+      ctx.clearRect(0,0,w,h);
+      var order=opts.staticOrder!==undefined ? opts.staticOrder : progress();
+      var breathing=Math.sin(t*0.0006)*2;
+      for(var k=0;k<pts.length;k++){
+        var p=pts[k];
+        var ox=p.tx+Math.cos(p.ph+t*0.0003)*(1-order)*40;
+        var oy=p.ty+Math.sin(p.ph+t*0.0003)*(1-order)*40;
+        var nx=p.x+(ox-p.x)*0.02 + (order*0)*0;
+        var ny=p.y+(oy-p.y)*0.02;
+        p.x=p.x+((p.tx*order+ (1-order)*0)-p.x)*0.0001 + (ox-p.x)*0.02;
+        p.y=p.y+((p.ty*order)-p.y)*0.0001 + (oy-p.y)*0.02;
+
+        var dx=p.x-mouse.x, dy=p.y-mouse.y, dist=Math.sqrt(dx*dx+dy*dy);
+        var px=p.x, py=p.y;
+        if(dist<120){ var f=(120-dist)/120; px+=dx/dist*f*18; py+=dy/dist*f*18; }
+
+        ctx.beginPath();
+        ctx.arc(px,py,p.r+breathing*0.15*order,0,Math.PI*2);
+        ctx.fillStyle=order>0.5 ? accentColor : lineColor;
+        ctx.globalAlpha=0.35+order*0.4;
+        ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
+    resize(); seed();
+    // Mobile Safari fires 'resize' when its address bar shows/hides while
+    // scrolling, even though the page hasn't actually changed width. Only
+    // re-seed the particle field when the width actually changed (a real
+    // resize/rotation), so scrolling doesn't keep resetting the canvas.
+    var lastW=w;
+    window.addEventListener('resize', function(){
+      resize();
+      if(w!==lastW){ lastW=w; seed(); }
+    });
+    if(canHover){ window.addEventListener('mousemove', function(e){ var r=canvas.getBoundingClientRect(); mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top; }); }
+    if(reduced){ opts.staticOrder=0.7; frame(0); } else { requestAnimationFrame(frame); }
+  }
+  initField('hero-canvas', { count:140 });
+  initField('contact-canvas', { count:70, staticOrder:0.85 });
+
+  /* ---------- language switch ---------- */
+  function applyLang(lang){
+    var dict = I18N[lang] || I18N.es;
+    currentLang = I18N[lang] ? lang : 'es';
+    document.documentElement.setAttribute('lang', currentLang);
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var k=el.getAttribute('data-i18n');
+      if(dict[k]!=null){ el.textContent=dict[k]; }
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+      var k=el.getAttribute('data-i18n-html');
+      if(dict[k]!=null){ el.innerHTML=dict[k]; }
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function(el){
+      var k=el.getAttribute('data-i18n-aria');
+      if(dict[k]!=null){ el.setAttribute('aria-label', dict[k]); }
+    });
+    buildHeroTitle(HERO_LINES[currentLang]);
+    buildKinetic(dict.kinetic_text);
+    buildMarquee(MARQUEE[currentLang]);
+    updateThemeToggleAria();
+    document.querySelectorAll('.lang-switch button').forEach(function(btn){
+      btn.classList.toggle('active', btn.getAttribute('data-lang')===currentLang);
+    });
+    try{ localStorage.setItem('impulseia-lang', currentLang); }catch(e){}
+  }
+  (function(){
+    var switcher=document.getElementById('langSwitch');
+    if(!switcher) return;
+    switcher.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click', function(){ applyLang(btn.getAttribute('data-lang')); });
+    });
+    var saved=null;
+    try{ saved=localStorage.getItem('impulseia-lang'); }catch(e){}
+    if(saved && saved!=='es' && I18N[saved]){ applyLang(saved); }
+  })();
+
+})();
+</script>
+</body>
+</html>
